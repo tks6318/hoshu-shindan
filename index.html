@@ -37,13 +37,15 @@
   .eyebrow{
     font-size:12px; letter-spacing:.14em; font-weight:700;
     color:var(--teal-deep); text-transform:none; margin:0 0 10px;
+    text-align:center;
   }
   h1{
     font-family:"Noto Serif JP",serif; font-weight:700;
-    font-size:clamp(23px,6.6vw,29px); line-height:1.5; margin:0 0 13px;
-    letter-spacing:.01em; text-wrap:balance;
+    font-size:clamp(20px,6vw,24px); line-height:1.55; margin:0 0 13px;
+    letter-spacing:0; text-align:center;
+    line-break:strict; word-break:keep-all;
   }
-  .lede{ color:#33414f; font-size:15px; margin:0 0 8px; text-wrap:pretty; }
+  .lede{ color:#33414f; font-size:15px; margin:0 0 8px; text-align:center; line-break:strict; }
   .factline{
     border-left:3px solid var(--teal); background:#eef4f2;
     padding:12px 14px; border-radius:0 8px 8px 0; font-size:13.5px;
@@ -172,7 +174,7 @@
   <!-- ============ FORM ============ -->
   <div id="form">
     <p class="eyebrow">介護事業所むけ ｜ 30秒セルフ診断</p>
-    <h1>その報酬、毎月いくら取りこぼしていますか。</h1>
+    <h1>その報酬、毎月いくら<br>取りこぼしていますか？</h1>
     <p class="lede">BCP未策定減算と、機能訓練系の加算。5つの質問で「いま漏れている金額」を概算します。</p>
     <div class="factline">
       <b>2024年4月にBCP策定が完全義務化</b>。さらに未策定減算の経過措置も<b>2025年3月で終了</b>し、現在は未策定だと毎月（施設・居住系3％／その他1％）が確実に減算されます。

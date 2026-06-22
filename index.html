@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>介護事業所 取りこぼし診断 ｜ BCP・加算リスクチェック</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#1f2a37;
+    --paper:#f6f4ef;
+    --card:#fffefb;
+    --teal:#2f7d72;
+    --teal-deep:#245f57;
+    --clay:#b5543f;
+    --line:#e3ddd1;
+    --muted:#6b7280;
+    --shadow:0 1px 2px rgba(31,42,55,.04),0 8px 24px rgba(31,42,55,.06);
+  }
+  *{box-sizing:border-box;}
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Noto Sans JP",system-ui,sans-serif;
+    line-height:1.75;
+    font-size:16px;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    overflow-wrap:break-word;
+    word-break:normal;
+  }
+  .wrap{ max-width:560px; margin:0 auto; padding:22px 18px 56px; }
+  .eyebrow{
+    font-size:12px; letter-spacing:.14em; font-weight:700;
+    color:var(--teal-deep); text-transform:none; margin:0 0 10px;
+  }
+  h1{
+    font-family:"Noto Serif JP",serif; font-weight:700;
+    font-size:clamp(23px,6.6vw,29px); line-height:1.5; margin:0 0 13px;
+    letter-spacing:.01em; text-wrap:balance;
+  }
+  .lede{ color:#33414f; font-size:15px; margin:0 0 8px; text-wrap:pretty; }
+  .factline{
+    border-left:3px solid var(--teal); background:#eef4f2;
+    padding:12px 14px; border-radius:0 8px 8px 0; font-size:13.5px;
+    color:#2b3a44; margin:18px 0 4px;
+  }
+  .factline b{ color:var(--teal-deep); }
+
+  .card{
+    background:var(--card); border:1px solid var(--line);
+    border-radius:14px; padding:20px 18px; box-shadow:var(--shadow);
+    margin-top:18px;
+  }
+  .qnum{
+    font-family:"Noto Serif JP",serif; font-size:13px; font-weight:700;
+    color:var(--teal-deep); letter-spacing:.08em;
+  }
+  .qtitle{ font-weight:700; font-size:16px; margin:2px 0 4px; }
+  .qhint{ font-size:12.5px; color:var(--muted); margin:0 0 14px; }
+
+  .opts{ display:grid; gap:9px; }
+  .opt{
+    display:flex; align-items:center; gap:11px; cursor:pointer;
+    border:1.5px solid var(--line); border-radius:10px; padding:12px 13px;
+    background:#fff; transition:border-color .15s, background .15s;
+    font-size:14.5px; font-weight:500;
+  }
+  .opt:hover{ border-color:#cdd8d4; }
+  .opt input{ accent-color:var(--teal); width:18px; height:18px; flex:0 0 auto; }
+  .opt.sel{ border-color:var(--teal); background:#eef4f2; }
+
+  .field{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .field input[type=number]{
+    font-family:inherit; font-size:18px; font-weight:700; color:var(--ink);
+    width:130px; padding:10px 12px; border:1.5px solid var(--line);
+    border-radius:10px; background:#fff; -moz-appearance:textfield;
+  }
+  .field input:focus{ outline:2px solid var(--teal); outline-offset:1px; border-color:var(--teal); }
+  .unit{ font-size:14px; color:var(--muted); font-weight:500; }
+  .twocol{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .twocol .sub{ font-size:12.5px; color:var(--muted); margin:0 0 5px; font-weight:500; }
+  .twocol input{ width:100%; }
+
+  #cond{ display:none; }
+  #cond.show{ display:block; }
+
+  .btn{
+    display:block; width:100%; border:none; cursor:pointer;
+    background:var(--teal); color:#fff; font-family:inherit; font-weight:700;
+    font-size:16px; padding:15px; border-radius:12px; margin-top:22px;
+    transition:background .15s; letter-spacing:.02em;
+  }
+  .btn:hover{ background:var(--teal-deep); }
+  .btn:disabled{ background:#c4cdca; cursor:not-allowed; }
+  .btn.ghost{ background:#fff; color:var(--teal-deep); border:1.5px solid var(--line); }
+  .btn.ghost:hover{ background:#f3f6f5; }
+
+  .err{ color:var(--clay); font-size:13px; margin-top:10px; display:none; }
+  .err.show{ display:block; }
+
+  /* ---- result ---- */
+  #result{ display:none; }
+  .finding{
+    background:var(--ink); color:#fff; border-radius:16px;
+    padding:26px 22px; margin-top:8px; text-align:center;
+  }
+  .finding .lbl{ font-size:13px; letter-spacing:.06em; color:#c7d0cd; margin:0 0 6px; }
+  .bignum{
+    font-family:"Noto Serif JP",serif; font-weight:700;
+    font-size:clamp(34px,10vw,52px); line-height:1.08; color:#fff;
+    font-variant-numeric:tabular-nums; letter-spacing:.01em;
+    overflow-wrap:break-word;
+  }
+  .bignum .yen{ font-size:.42em; font-weight:500; margin-right:4px; vertical-align:.18em; color:#e6b864;}
+  .bignum em{ color:#e6b864; font-style:normal; }
+  .finding .sub{ font-size:13.5px; color:#b9c2bf; margin:10px 0 0; }
+  .finding.clean{ background:var(--teal-deep); }
+  .finding.clean .bignum{ font-size:clamp(24px,7vw,34px); }
+
+  .breakdown{ margin-top:16px; }
+  .brow{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:14px; padding:14px 2px; border-bottom:1px solid var(--line);
+  }
+  .brow:last-child{ border-bottom:none; }
+  .brow .name{ font-weight:700; font-size:14.5px; }
+  .brow .desc{ font-size:12.5px; color:var(--muted); margin-top:3px; line-height:1.6; }
+  .brow .amt{ font-weight:700; font-size:15.5px; white-space:nowrap; color:var(--clay); font-variant-numeric:tabular-nums; }
+  .brow .amt small{ display:block; font-size:11px; color:var(--muted); font-weight:500; text-align:right; }
+  .brow.zero .amt{ color:var(--teal-deep); }
+
+  .caveat{ font-size:11.5px; color:var(--muted); line-height:1.7; margin-top:14px; background:#f1eee7; padding:12px 13px; border-radius:9px; }
+
+  .next h3{ font-family:"Noto Serif JP",serif; font-size:17px; margin:0 0 4px; }
+  .next p.k{ font-size:13.5px; color:#33414f; margin:0 0 14px; }
+  .steps{ display:grid; gap:8px; }
+  .step{ display:flex; gap:11px; align-items:flex-start; font-size:13.5px; }
+  .step .i{ flex:0 0 auto; width:22px; height:22px; border-radius:50%; background:#eef4f2; color:var(--teal-deep); font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; margin-top:2px; }
+
+  .cta{ background:linear-gradient(180deg,#eef4f2,#e7f0ed); border:1px solid #d3e1dc; border-radius:14px; padding:20px 18px; margin-top:18px; }
+  .cta .who{ font-size:13px; color:#2b3a44; line-height:1.7; margin:0 0 14px; }
+  .cta .who b{ color:var(--teal-deep); }
+
+  .role{ display:inline-block; font-size:11.5px; font-weight:700; letter-spacing:.06em;
+    color:var(--teal-deep); background:#dcebe6; padding:4px 11px; border-radius:999px; margin:0 0 12px; }
+  .card.staff{ background:#fbf6ee; border-color:#ecdfc9; margin-top:14px; }
+  .staff-role{ color:#9a6326; background:#f3e6d0; }
+  .who2{ font-size:13.5px; color:#33414f; line-height:1.78; margin:0 0 10px; }
+  .who2 b{ color:var(--ink); }
+  .who2-2{ font-size:13.5px; color:#33414f; line-height:1.7; margin:0 0 14px; font-weight:500; }
+  .btn.share{ background:#fff; color:var(--teal-deep); border:1.5px solid var(--teal); margin-top:0; }
+  .btn.share:hover{ background:#eef4f2; }
+
+  .foot{ text-align:center; font-size:11.5px; color:var(--muted); margin-top:26px; line-height:1.7; }
+
+  @media (max-width:480px){
+    .twocol{ grid-template-columns:1fr; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{ scroll-behavior:auto !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ FORM ============ -->
+  <div id="form">
+    <p class="eyebrow">介護事業所むけ ｜ 30秒セルフ診断</p>
+    <h1>その報酬、毎月いくら取りこぼしていますか。</h1>
+    <p class="lede">BCP未策定減算と、機能訓練系の加算。5つの質問で「いま漏れている金額」を概算します。</p>
+    <div class="factline">
+      <b>2024年4月にBCP策定が完全義務化</b>。さらに未策定減算の経過措置も<b>2025年3月で終了</b>し、現在は未策定だと毎月（施設・居住系3％／その他1％）が確実に減算されます。
+    </div>
+
+    <!-- Q1 -->
+    <div class="card" data-q="1">
+      <span class="qnum">Q1</span>
+      <div class="qtitle">サービス種別を教えてください</div>
+      <p class="qhint">減算率の判定に使います</p>
+      <div class="opts" id="q1">
+        <label class="opt"><input type="radio" name="kind" value="tsusho"><span>通所介護・地域密着型通所（デイ）</span></label>
+        <label class="opt"><input type="radio" name="kind" value="houmon"><span>訪問系（訪問介護・訪問看護など）</span></label>
+        <label class="opt"><input type="radio" name="kind" value="nyusho"><span>入所・特定施設など（居住系）</span></label>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="card" data-q="2">
+      <span class="qnum">Q2</span>
+      <div class="qtitle">月間の介護報酬（保険請求額）の概算</div>
+      <p class="qhint">おおよそで大丈夫です</p>
+      <div class="field">
+        <input type="number" id="revenue" min="0" step="10" inputmode="numeric" placeholder="例 400">
+        <span class="unit">万円 / 月</span>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="card" data-q="3">
+      <span class="qnum">Q3</span>
+      <div class="qtitle">BCP（策定・研修・訓練）は完了していますか</div>
+      <p class="qhint">3つすべて整って初めて「策定済み」です</p>
+      <div class="opts" id="q3">
+        <label class="opt"><input type="radio" name="bcp" value="yes"><span>はい、研修・訓練まで完了している</span></label>
+        <label class="opt"><input type="radio" name="bcp" value="no"><span>いいえ／一部しかできていない</span></label>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="card" data-q="4">
+      <span class="qnum">Q4</span>
+      <div class="qtitle">機能訓練指導員は配置されていますか</div>
+      <p class="qhint">PT・OT・ST・看護師・柔道整復師 等</p>
+      <div class="opts" id="q4">
+        <label class="opt"><input type="radio" name="staff" value="yes"><span>いる</span></label>
+        <label class="opt"><input type="radio" name="staff" value="no"><span>いない</span></label>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="card" data-q="5">
+      <span class="qnum">Q5</span>
+      <div class="qtitle">個別機能訓練加算を算定していますか</div>
+      <p class="qhint">通所系で算定できる加算です</p>
+      <div class="opts" id="q5">
+        <label class="opt"><input type="radio" name="kasan" value="yes"><span>算定している</span></label>
+        <label class="opt"><input type="radio" name="kasan" value="no"><span>算定していない</span></label>
+        <label class="opt"><input type="radio" name="kasan" value="na"><span>対象外（訪問・入所など）</span></label>
+      </div>
+
+      <!-- conditional -->
+      <div id="cond">
+        <div style="height:1px;background:var(--line);margin:16px 0;"></div>
+        <p class="qhint" style="margin-bottom:10px;color:var(--clay);font-weight:500;">指導員がいるのに未算定の場合、取りこぼし額を概算します。</p>
+        <div class="twocol">
+          <div>
+            <p class="sub">1日あたり平均利用者数</p>
+            <input type="number" id="users" min="0" step="1" inputmode="numeric" placeholder="例 25">
+          </div>
+          <div>
+            <p class="sub">月間の営業日数</p>
+            <input type="number" id="days" min="0" step="1" inputmode="numeric" placeholder="例 25">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" id="run">取りこぼしを診断する</button>
+    <p class="err" id="err">未入力の項目があります。すべてお答えください。</p>
+    <p class="foot">本診断は概算の試算です。実際の金額は体制・算定状況により異なります。</p>
+  </div>
+
+  <!-- ============ RESULT ============ -->
+  <div id="result">
+    <p class="eyebrow">診断結果</p>
+    <div class="finding" id="finding">
+      <p class="lbl" id="findLbl">いま取りこぼしている可能性（年間・概算）</p>
+      <div class="bignum" id="bignum"><span class="yen">約</span>0<em>万円</em></div>
+      <p class="sub" id="findSub"></p>
+    </div>
+
+    <div class="card breakdown" id="breakdown"></div>
+
+    <p class="caveat" id="caveat"></p>
+
+    <div class="card next" id="nextBox">
+      <h3>ここから先は、経営の数字です。</h3>
+      <p class="k">取りこぼしを止めたあと、本当に守るべきは「トップが倒れても会社が続くか」。次の3つは、個別相談で一緒に出します。</p>
+      <div class="steps">
+        <div class="step"><span class="i">A</span><div>管理者・機能訓練指導員が1か月離脱したときの<b>想定損害額</b></div></div>
+        <div class="step"><span class="i">B</span><div>会社を止めないための<b>防衛資金（必要キャッシュ）</b>の目安</div></div>
+        <div class="step"><span class="i">C</span><div>選択制DCで<b>手取りを増やし、求人に書ける</b>採用力シミュレーション</div></div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <span class="role">経営者の方へ</span>
+      <p class="who">この診断ツールは、<b>元理学療法士のFP</b>が、介護現場の事業継続と業務効率化のために自分で作りました。御社の「防衛資金の作り方」と「採用力アップ（DC）の設計」を、30分だけ一緒に整理しませんか。</p>
+      <a class="btn" id="ctaBtn" href="#" target="_blank" rel="noopener">30分の個別相談を申し込む</a>
+    </div>
+
+    <div class="card staff">
+      <span class="role staff-role">従業員・スタッフの方へ</span>
+      <p class="who2">経営者でなくても——むしろ現場のあなたにこそ、この結果を届けてほしい。報酬の取りこぼしやBCPの未整備は、いざという時に<b>事業が止まり、利用者さんもあなたの雇用も守れない</b>ことに直結します。逆にここで止血できれば、その原資を<b>退職金（DC）・手取りアップ・人手不足対策</b>に回せます。</p>
+      <p class="who2-2">この結果を経営者に見せて、「一度プロに相談してみては」と一言、伝えてみてください。</p>
+      <button class="btn share" id="shareBtn">結果を経営者に共有する</button>
+    </div>
+
+    <button class="btn ghost" id="again">もう一度診断する</button>
+    <p class="foot">概算試算につき、契約や算定可否を保証するものではありません。</p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // ---- config (容易に差し替え可能) ----
+  var CONFIG = {
+    unitYen: 10,            // 地域区分（中津・大分=その他10円想定。要確認で変更）
+    kinoUnit: 56,           // 個別機能訓練加算(Ⅰ)イ 56単位/日（令和6年度）
+    rateNyusho: 0.03,       // 施設・居住系 BCP未策定減算率
+    rateOther: 0.01,        // その他サービス BCP未策定減算率
+    consultUrl: "#"         // ← Googleフォーム/予約URLに差し替え
+  };
+
+  var $ = function(id){ return document.getElementById(id); };
+  var lastResult = null;
+  var yen = function(n){ return Math.round(n).toLocaleString("ja-JP"); };
+  var man = function(n){ return Math.round(n/10000).toLocaleString("ja-JP"); };
+
+  // selected-state styling
+  document.querySelectorAll(".opts").forEach(function(group){
+    group.addEventListener("change", function(){
+      group.querySelectorAll(".opt").forEach(function(o){
+        o.classList.toggle("sel", o.querySelector("input").checked);
+      });
+      maybeShowCond();
+    });
+  });
+
+  function val(name){
+    var el = document.querySelector('input[name="'+name+'"]:checked');
+    return el ? el.value : null;
+  }
+  function maybeShowCond(){
+    var show = val("staff")==="yes" && val("kasan")==="no";
+    $("cond").classList.toggle("show", show);
+  }
+
+  $("run").addEventListener("click", function(){
+    var kind = val("kind");
+    var bcp = val("bcp");
+    var staff = val("staff");
+    var kasan = val("kasan");
+    var revenue = parseFloat($("revenue").value);
+
+    var missing = !kind || !bcp || !staff || !kasan || isNaN(revenue);
+    var needUsers = (staff==="yes" && kasan==="no");
+    var users = parseFloat($("users").value);
+    var days = parseFloat($("days").value);
+    if(needUsers && (isNaN(users)||isNaN(days))) missing = true;
+
+    if(missing){ $("err").classList.add("show"); return; }
+    $("err").classList.remove("show");
+
+    // ---- 成分① BCP未策定減算（基本報酬ベースの概算上限）----
+    var rate = (kind==="nyusho") ? CONFIG.rateNyusho : CONFIG.rateOther;
+    var revenueYen = revenue * 10000;
+    var bcpLoss = (bcp==="no") ? revenueYen * rate : 0;
+
+    // ---- 成分② 個別機能訓練加算 取りこぼし ----
+    var kinoLoss = 0;
+    if(staff==="yes" && kasan==="no" && !isNaN(users) && !isNaN(days)){
+      kinoLoss = CONFIG.kinoUnit * CONFIG.unitYen * users * days;
+    }
+
+    var monthly = bcpLoss + kinoLoss;
+    var yearly = monthly * 12;
+
+    render(monthly, yearly, bcpLoss, kinoLoss, rate, bcp, staff, kasan);
+  });
+
+  function render(monthly, yearly, bcpLoss, kinoLoss, rate, bcp, staff, kasan){
+    $("form").style.display = "none";
+    $("result").style.display = "block";
+    window.scrollTo({top:0, behavior:"smooth"});
+
+    var finding = $("finding");
+    var clean = (monthly <= 0);
+    lastResult = { yearly:yearly, monthly:monthly, clean:clean };
+
+    if(clean){
+      finding.classList.add("clean");
+      $("findLbl").textContent = "現時点での明らかな取りこぼし";
+      $("bignum").innerHTML = "見当たりません";
+      $("findSub").textContent = "減算も加算の取りこぼしも確認されませんでした。次は「守り」の設計へ。";
+    }else{
+      $("findLbl").textContent = "いま取りこぼしている可能性（年間・概算）";
+      $("findSub").textContent = "毎月 約" + man(monthly) + "万円が、止められる損失です。";
+      countUp($("bignum"), yearly/10000);
+    }
+
+    // breakdown
+    var rows = "";
+    rows += brow(
+      "BCP未策定減算",
+      (bcp==="no"
+        ? "未策定のため、所定単位数の"+(rate*100)+"％が毎月減算（基本報酬ベースの概算上限）"
+        : "策定済みのため減算なし"),
+      bcpLoss, bcp==="yes");
+    rows += brow(
+      "個別機能訓練加算の取りこぼし",
+      (staff==="yes" && kasan==="no"
+        ? "本来もらえるのに未算定。誰も「請求していい」とは言いに来ず、放置すれば毎月そのまま消えます（56単位×"+CONFIG.unitYen+"円×延べ利用回数で概算）"
+        : (kasan==="yes" ? "算定済みのため取りこぼしなし" : "対象外または指導員未配置")),
+      kinoLoss, !(staff==="yes" && kasan==="no"));
+    $("breakdown").innerHTML = rows;
+
+    $("caveat").innerHTML =
+      "※ あくまで概算試算です。BCP未策定減算は基本報酬（所定単位数）に対して算定されるため、本診断は上限の目安です。"+
+      "なお、運営指導でBCP未策定が発覚した場合、この減算は基準を満たさなくなった時点（通所等は2024年4月）まで遡って適用されます。"+
+      "個別機能訓練加算は計画作成・実施・記録などの要件を満たした場合に算定できる加算で、自動的に得られる金額ではありません。"+
+      "正確な金額と算定可否は、体制を確認のうえ個別に精査します。";
+
+    $("ctaBtn").setAttribute("href", CONFIG.consultUrl);
+
+    // ここでSupabase等に診断データを送信（実装時に追記）
+    // submitToSupabase({ monthly:monthly, yearly:yearly, bcp:bcp, staff:staff, kasan:kasan });
+  }
+
+  function brow(name, desc, amt, isZero){
+    return '<div class="brow'+(isZero?' zero':'')+'">'+
+      '<div><div class="name">'+name+'</div><div class="desc">'+desc+'</div></div>'+
+      '<div class="amt">'+ (amt>0 ? ('約'+yen(amt)+'円') : '0円') +
+      '<small>'+(amt>0?'/月':'')+'</small></div></div>';
+  }
+
+  function countUp(el, targetMan){
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+    var paint = function(v){
+      el.innerHTML = '<span class="yen">約</span>'+ yen(v) +'<em>万円</em>';
+    };
+    if(reduce || targetMan<=0){ paint(targetMan); return; }
+    var start=null, dur=900;
+    function frame(t){
+      if(!start) start=t;
+      var p=Math.min((t-start)/dur,1);
+      var e=1-Math.pow(1-p,3);
+      paint(targetMan*e);
+      if(p<1) requestAnimationFrame(frame); else paint(targetMan);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  $("again").addEventListener("click", function(){
+    $("result").style.display="none";
+    $("finding").classList.remove("clean");
+    $("form").style.display="block";
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+
+  $("shareBtn").addEventListener("click", async function(){
+    var txt;
+    if(lastResult && !lastResult.clean){
+      var m = Math.round(lastResult.yearly/10000).toLocaleString("ja-JP");
+      txt = "【介護報酬の取りこぼし診断】\n年間で約"+m+"万円が、止められる可能性がありました。\n"+
+            "BCP未策定減算と加算の見直しについて、一度プロに相談してみませんか。";
+    }else{
+      txt = "【介護報酬の取りこぼし診断】\n明らかな取りこぼしは見当たりませんでした。\n"+
+            "次は「トップが倒れても会社が続くか」の備えを、一度プロと点検してみませんか。";
+    }
+    var url = location.href;
+    if(navigator.share){
+      try{ await navigator.share({ title:"取りこぼし診断の結果", text:txt, url:url }); }
+      catch(e){ /* ユーザーがキャンセルした場合は何もしない */ }
+      return;
+    }
+    try{
+      await navigator.clipboard.writeText(txt+"\n"+url);
+      alert("結果をコピーしました。経営者にそのまま送ってください。");
+    }catch(e){
+      window.print();
+    }
+  });
+})();
+</script>
+</body>
+</html>
